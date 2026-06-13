@@ -10,14 +10,28 @@ Today's date is provided in the session context — treat anything older than ~4
 hours as stale and de-prioritize it.
 
 ## Step 1 — Gather
-Run several `WebSearch` queries to find what the AI/ML community is buzzing about
-right now. Use a mix like (adapt as needed):
+Run **at least 6–8** `WebSearch` queries to find what the AI/ML community is
+buzzing about *right now*. The goal is **day-specific breaking news**, not
+evergreen roundups.
+
+Bias the queries toward freshness and specifics — include the **current month and
+year** and concrete event types:
+- `AI news today <Month> <day> <year>`
+- `new AI model release this week <Month year>` (and name labs: OpenAI, Anthropic,
+  Google DeepMind, Meta AI, Mistral, xAI, Alibaba/Qwen, Moonshot/Kimi)
+- `AI announcement <Month year>` for each major lab
 - `site:x.com OR site:twitter.com AI ML trending`
-- `AI machine learning hot topics today`
-- `new LLM model release announcement`
-- `AI research paper viral discussion`
-- searches around major labs/accounts: OpenAI, Anthropic, Google DeepMind,
-  Meta AI, Mistral, Hugging Face, and prominent AI researchers.
+- `AI viral thread X this week` / `new AI term coined developers`
+- prominent commentators who break news: `simonwillison.net`, `techcrunch.com`,
+  `simonwillison AI <Month year>`, Andrej Karpathy, Addy Osmani.
+
+**Critical — follow the leads.** When a result mentions a *specific proper noun or
+newly coined term* you haven't already searched (a new model name, a person's
+move, a phrase like "loop engineering"), run a **dedicated follow-up search** on
+it before deciding what's hot. The hottest items are usually specific named things
+(e.g. a model launched 2–4 days ago, an X-origin meme), and generic queries bury
+them under SEO listicles. Treat "10 AI trends in <year>"-style listicles as weak
+signal; prefer dated articles and original X posts.
 
 If a specific public X thread or article looks central to a topic, optionally
 `WebFetch` it for a sharper one-line summary. Don't block on any single source.
