@@ -1,13 +1,20 @@
 ---
 description: Scan X/Twitter and the web for today's hottest AI/ML topics and push a digest
-allowed-tools: WebSearch, WebFetch, PushNotification
+allowed-tools: WebSearch, WebFetch, PushNotification, Bash(git*), Read, Write
 ---
 
 You are generating a **daily AI/ML hot-topics digest** sourced from Twitter/X and
 the broader web, then delivering it as a push notification.
 
-Today's date is provided in the session context — treat anything older than ~48
-hours as stale and de-prioritize it.
+This runs **every day**, so the job is to surface **what's new since yesterday** —
+not to re-report the same ongoing stories all week. Treat anything older than
+~48 hours as stale, and use a dedup log to avoid repeats.
+
+## Step 0 — Load recent history (dedup)
+Read `.claude/state/recent-topics.md` if it exists (it's a log of topics already
+reported over the past ~7 days, one `YYYY-MM-DD | topic headline` per line).
+Use it to recognize what you've already sent. If the file doesn't exist yet,
+treat history as empty.
 
 ## Step 1 — Gather
 Run **at least 6–8** `WebSearch` queries to find what the AI/ML community is
@@ -36,23 +43,45 @@ signal; prefer dated articles and original X posts.
 If a specific public X thread or article looks central to a topic, optionally
 `WebFetch` it for a sharper one-line summary. Don't block on any single source.
 
-## Step 2 — Synthesize
-Produce a digest of the **5–7 hottest AI/ML topics**:
-- One bold headline per topic.
-- One line on *why it's hot* (what happened / why people care).
-- A link where available.
-- Deduplicate overlapping items and order by how widely discussed each is
-  (most-discussed first).
+## Step 2 — Synthesize (new-first, with dedup)
+Classify each candidate topic against the Step 0 history:
+- **NEW** — not in the log. These are the priority.
+- **ONGOING** — already reported, but with a *material new development* today
+  (e.g. new benchmark, major reaction, follow-up release). Include only if there's
+  genuinely something new; lead the line with what changed.
+- **STALE** — already reported, nothing new today. **Drop it** (don't repeat).
 
-Keep it punchy and skimmable.
+Produce a digest of the **5–7 hottest topics**, prioritizing NEW items, then
+ONGOING-with-news. Each item:
+- One bold headline (prefix ONGOING items with `(cont.)`).
+- One line on *why it's hot* / what's new.
+- A link where available.
+- Order by how widely discussed each is (most-discussed first).
+
+If a genuinely quiet day yields fewer than 5 new items, that's fine — send fewer
+rather than padding with stale repeats.
 
 ## Step 3 — Deliver
 Call `PushNotification` (status `proactive`) with a **short headline summary** —
 the top 3 topics in one line, under 200 characters, no markdown. Example shape:
 `AI/ML today: 1) <topic> 2) <topic> 3) <topic>`.
 
-Then print the **full 5–7 topic digest** as your final message so it's visible in
-the session transcript (and survives even if the push isn't delivered).
+Then print the **full digest** as your final message so it's visible in the
+session transcript (and survives even if the push isn't delivered).
 
 If the push result says it wasn't sent, that's expected when Remote Control isn't
 connected — the digest in the transcript is still the deliverable.
+
+## Step 4 — Update the dedup log
+Append each topic you reported today (NEW and ONGOING) to
+`.claude/state/recent-topics.md`, one line per topic as `YYYY-MM-DD | headline`
+(create the file/dir if needed). Then **prune** any lines older than 7 days from
+today so the log stays small. Commit and push so tomorrow's run sees it:
+
+```
+git add .claude/state/recent-topics.md
+git commit -m "Update AI/ML digest dedup log (YYYY-MM-DD)"
+git push origin claude/daily-twitter-ai-ml-topics-gotlqa
+```
+
+If there's nothing new to report, skip the commit.
