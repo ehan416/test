@@ -40,8 +40,20 @@ it before deciding what's hot. The hottest items are usually specific named thin
 them under SEO listicles. Treat "10 AI trends in <year>"-style listicles as weak
 signal; prefer dated articles and original X posts.
 
-If a specific public X thread or article looks central to a topic, optionally
-`WebFetch` it for a sharper one-line summary. Don't block on any single source.
+### Find the originating tweet + engagement
+For each hot topic, also run a targeted `WebSearch` to locate the **originating /
+most-viral X post**, scoping with `allowed_domains: ["x.com", "twitter.com"]`.
+Useful query shapes:
+- `<topic or person> tweet x.com likes reposts`
+- `<exact quote or coined phrase> x.com`
+- `<lab/person handle> announcement x.com`
+
+Capture the **direct status URL** (e.g. `https://x.com/<user>/status/<id>`) and any
+**engagement numbers** (likes / reposts / replies / quotes / views) that appear in
+the search snippet. Note: search snippets are the reliable source for these counts
+— **`WebFetch` on x.com typically returns 403** (no authenticated X access here),
+so don't rely on fetching the tweet page; record only the numbers search surfaces,
+and omit counts when none are available rather than guessing.
 
 ## Step 2 — Synthesize (new-first, with dedup)
 Classify each candidate topic against the Step 0 history:
@@ -55,8 +67,11 @@ Produce a digest of the **5–7 hottest topics**, prioritizing NEW items, then
 ONGOING-with-news. Each item:
 - One bold headline (prefix ONGOING items with `(cont.)`).
 - One line on *why it's hot* / what's new.
-- A link where available.
-- Order by how widely discussed each is (most-discussed first).
+- The **originating X post link** (`https://x.com/.../status/...`) when found, with
+  **engagement numbers in parentheses** if the search surfaced them
+  (e.g. `(13K reposts, 9.6K quotes, 1K likes)`). Add a supporting article link too.
+- Order by virality — prefer the engagement numbers as the ranking signal when
+  available, otherwise by how widely discussed the topic is.
 
 If a genuinely quiet day yields fewer than 5 new items, that's fine — send fewer
 rather than padding with stale repeats.
